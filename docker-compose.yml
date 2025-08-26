@@ -1,0 +1,104 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: lait
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: orders_db
+    ports:
+      - "5432:5432" 
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.1
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-server:7.2.1
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9997:9997"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9997
+      KAFKA_JMX_HOSTNAME: kafka
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+    depends_on:
+      - kafka
+    
+
+# {
+#    "order_uid": "b563feb7b2b84b6test",
+#    "track_number": "WBILMTESTTRACK",
+#    "entry": "WBIL",
+#    "delivery": {
+#       "name": "Test Testov",
+#       "phone": "+9720000000",
+#       "zip": "2639809",
+#       "city": "Kiryat Mozkin",
+#       "address": "Ploshad Mira 15",
+#       "region": "Kraiot",
+#       "email": "test@gmail.com"
+#    },
+#    "payment": {
+#       "transaction": "b563feb7b2b84b6test",
+#       "request_id": "",
+#       "currency": "USD",
+#       "provider": "wbpay",
+#       "amount": 1817,
+#       "payment_dt": 1637907727,
+#       "bank": "alpha",
+#       "delivery_cost": 1500,
+#       "goods_total": 317,
+#       "custom_fee": 0
+#    },
+#    "items": [
+#       {
+#          "chrt_id": 9934930,
+#          "track_number": "WBILMTESTTRACK",
+#          "price": 453,
+#          "rid": "ab4219087a764ae0btest",
+#          "name": "Mascaras",
+#          "sale": 30,
+#          "size": "0",
+#          "total_price": 317,
+#          "nm_id": 2389212,
+#          "brand": "Vivienne Sabo",
+#          "status": 202
+#       }
+#    ],
+#    "locale": "en",
+#    "internal_signature": "",
+#    "customer_id": "test",
+#    "delivery_service": "meest",
+#    "shardkey": "9",
+#    "sm_id": 99,
+#    "date_created": "2021-11-26T06:22:19Z",
+#    "oof_shard": "1"
+# }
